@@ -95,11 +95,17 @@ class User < ApplicationRecord
   # ユーザーをフォローする
   def follow(other_user)
     active_relationships.create(followed_id: other_user.id)
+    if other_user.follow_notification
+      Relationship.send_follow_email(other_user, self)
+    end
   end
 
   # ユーザーをフォロー解除する
   def unfollow(other_user)
     active_relationships.find_by(followed_id: other_user.id).destroy
+    if other_user.follow_notification
+      Relationship.send_unfollow_email(other_user, self)
+    end
   end
 
   # 現在のユーザーがフォローしてたらtrueを返す
