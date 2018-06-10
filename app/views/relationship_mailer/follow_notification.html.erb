@@ -4,8 +4,8 @@
 
 <p>
   <%= @follower.name %> started following you!
+  You have <%= @user.followers.count %> followers now.
   Click on the link below to check your followers:
 </p>
 
-<%= link_to "Your follower list",
-      followers_user_url(@user) %>
+<%= link_to "Your follower list", followers_user_url(@user) %>

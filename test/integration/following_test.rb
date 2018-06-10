@@ -54,30 +54,23 @@ class FollowingTest < ActionDispatch::IntegrationTest
     end
   end
   
-  test "should send follow notification email" do
-    notify = users(:michael)
+  # フォロワー増加、または減少時のメール通信機能のテスト
+  test "should send follow/unfollow notification email" do
+    log_in_as(@user)
+    notify = users(:archer)
     post relationships_path, params: {followed_id: notify.id}
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    relationship = @user.active_relationships.find_by(followed_id: notify.id)
+    delete relationship_path(relationship)
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
-  test "should not send follow notification email" do
+  test "should not send follow/unfollow notification email" do
+    log_in_as(@other)
     not_notify = users(:malory)
     post relationships_path, params: {followed_id: not_notify.id}
-    assert_equal 0, ActionMailer::Base.deliveries.size
-  end
-
-  test "should send unfollow notification email" do
-    @user.follow(@other)
-    relationship = @user.active_relationships.find_by(followed_id: @other.id)
-    delete relationship_path(relationship)
-    assert_equal 2, ActionMailer::Base.deliveries.size # follow email and unfollow email
-  end
-
-  test "should not send unfollow notification email" do
-    not_notify = users(:malory)
-    # @user.follow(not_notify)
-    relationship = @user.active_relationships.find_by(followed_id: not_notify.id)
+    relationship = @other.active_relationships.find_by(followed_id: not_notify.id)
     delete relationship_path(relationship)
     assert_equal 0, ActionMailer::Base.deliveries.size
   end
+
 end
